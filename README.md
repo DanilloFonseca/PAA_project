@@ -1,6 +1,6 @@
 # PROJETO E ANÁLISE DE ALGORITMOS
 
-Este projeto implementa a **heurística de Clarke & Wright** para o **Problema de Roteamento de Veículos**, utilizando Python e a biblioteca **NetworkX** para modelagem de grafos.
+Este projeto implementa a **heurística de Clarke & Wright** para o **Problema de Roteamento de Veículos**, utilizando Python e a biblioteca **NetworkX** para modolagem de grafos.
 
 ---
 
