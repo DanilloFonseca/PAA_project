@@ -7,6 +7,7 @@ from utils.file_reader import le_arquivo
 from utils.graph_constructor import constroi_grafo
 from heuristicas.clarke_wright import clarke_wright
 from exatos.branch_and_bound import cvrp_branch_and_bound
+from meta_heuristicas.grasp import grasp_cvrp
 
 
 def selecionar_instancia(diretorio: str) -> str:
@@ -44,6 +45,7 @@ def selecionar_algoritmo() -> str:
     print("\nSelecione o algoritmo para execução:\n")
     print("1. Clarke & Wright (Heurístico)")
     print("2. Branch and Bound (Exato)")
+    print("3. GRASP (Meta-heurística)")
 
     while True:
         try:
@@ -53,30 +55,64 @@ def selecionar_algoritmo() -> str:
                 return "clarke_wright"
             elif opcao == 2:
                 return "branch_and_bound"
+            elif opcao == 3:
+                return "grasp"
             else:
-                print("Número inválido. Escolha 1 ou 2.")
+                print("Número inválido. Escolha 1, 2 ou 3.")
         except ValueError:
             print("Entrada inválida. Digite um número válido.")
 
 
-def executar_algoritmo(
-    G: nx.Graph,
-    demands: Dict[int, int],
-    depot: int,
-    capacity: int,
-    algoritmo: str
-) -> Tuple[List[List[int]], float]:
+def executar_algoritmo(G: nx.Graph,
+                       demands: Dict[int, int],
+                       depot: int,
+                       capacity: int,
+                       algoritmo: str) -> Tuple[List[List[int]], float]:
     """
     Executa o algoritmo selecionado e retorna as rotas e o custo total
     """
+
     if algoritmo == "clarke_wright":
-        print("\nExecutando algoritmo heurístico: Clarke & Wright...\n")
-        return clarke_wright(G, demands, depot, capacity)
+        rotas, custo = clarke_wright(G, demands, depot, capacity)
+        return rotas, custo
+
     elif algoritmo == "branch_and_bound":
-        print("\nExecutando algoritmo exato: Branch and Bound...\n")
-        return cvrp_branch_and_bound(G, demands, depot, capacity)
+        rotas, custo = cvrp_branch_and_bound(G, demands, depot, capacity)
+        return rotas, custo
+
+    elif algoritmo == "grasp":
+        print("\n---- Configuração do GRASP ----")
+        try:
+            max_it = int(input("Número de iterações: "))
+        except Exception:
+            max_it = 10
+            print("Número de iterações inválido, usando 10")
+        try:
+            alpha_in = input("Entre com o valor do alpha: ").strip()
+            if alpha_in == "":
+                alpha = 0.5
+            else:
+                alpha = float(alpha_in)
+                if not (0.0 <= alpha <= 1.0):
+                    print("Alpha fora do intervalo; usando 0.5")
+                    alpha = 0.5
+        except Exception:
+            alpha = 0.5
+            print("Entrada inválida para alpha; usando 0.5")
+
+        rotas, custo = grasp_cvrp(
+            G=G,
+            demands=demands,
+            depot=depot,
+            capacity=capacity,
+            alpha=alpha,
+            max_iterations=max_it,
+        )
+        return rotas, custo
+
     else:
-        raise ValueError("Algoritmo desconhecido.")
+        raise ValueError("Opção inválida")
+
 
 
 def imprimir_resultados(
